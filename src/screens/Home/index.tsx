@@ -1,148 +1,211 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, FlatList, Alert } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
+import { Checkbox } from "react-native-paper";
+import { FontAwesome } from "@expo/vector-icons";
 
 interface Task {
-    id: number;
-    name: string;
+  id: number;
+  name: string;
+  isCompleted: boolean;
 }
 
 const Home = () => {
-    const [taskName, setTaskName] = useState('');
-    const [tasks, setTasks] = useState<Task[]>([]);
+  const [taskName, setTaskName] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-    const TaskItem = ({ task, onRemove }: { task: Task; onRemove: (id: number) => void }) => (
-        <View style={styles.taskItem}>
-            <Text>{task.name}</Text>
-            <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => onRemove(task.id)}
-            >
-                <Text style={{ color: 'red' }}>
-                    <Text>
-                        Remover
-                    </Text>
-                </Text>
-            </TouchableOpacity>
-        </View>
+  // Adicionar uma nova tarefa
+  const handleTaskAdd = () => {
+    const newTask: Task = {
+      id: Math.random(),
+      name: taskName,
+      isCompleted: false,
+    };
+    setTasks((prevTasks) => [...prevTasks, newTask]);
+    setTaskName("");
+  };
+
+  // Remover uma tarefa
+  const handleTaskRemove = (taskId: number) => {
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  };
+
+  // Alternar estado de conclusão
+  const toggleTaskCompletion = (taskId: number) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId
+          ? { ...task, isCompleted: !task.isCompleted }
+          : task
+      )
     );
+  };
 
-    function handleTaskAdd() {
-        const newTask: Task = {
-            id: Math.random(),
-            name: taskName
-        }
-        setTasks(oldState => [...oldState, newTask]);
-        setTaskName('');
-    }
+  return (
+    <View style={styles.container}>
+      {/* Título */}
+      <Text style={styles.title}>todo</Text>
 
-    function handleTaskRemove(taskId: number) {
-        Alert.alert(
-            'Remover Tarefa',
-            'Tem certeza que deseja remover esta tarefa?',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Remover',
-                    onPress: () =>
-                        setTasks(oldState => oldState.filter(task => task.id !== taskId)),
-                    style: 'destructive'
-                }
-            ]
-        );
-    }
+      {/* Formulário para adicionar tarefas */}
+      <View style={styles.form}>
+        <TextInput
+          style={styles.input}
+          placeholder="Adicione uma nova tarefa"
+          placeholderTextColor="#808080"
+          onChangeText={setTaskName}
+          value={taskName}
+        />
+        <TouchableOpacity
+          style={[styles.addButton, !taskName.trim() && styles.disabledButton]}
+          onPress={handleTaskAdd}
+          disabled={!taskName.trim()}
+        >
+          <FontAwesome name="plus" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-    return (
-        <View style={styles.container} >
-            <Text style={styles.taskName}>
-                Adicionar Tarefa
-            </Text>
+      {/* Contadores de tarefas */}
+      <View style={styles.taskCounters}>
+        <Text style={styles.counterText}>
+          Criadas <Text style={styles.counterNumber}>{tasks.length}</Text>
+        </Text>
+        <Text style={styles.counterText}>
+          Concluídas{" "}
+          <Text style={styles.counterNumber}>
+            {tasks.filter((task) => task.isCompleted).length}
+          </Text>
+        </Text>
+      </View>
 
-            <View style={styles.form}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Digite o nome da tarefa..."
-                    placeholderTextColor="#aaa"
-                    onChangeText={setTaskName}
-                    value={taskName}
-                />
-                <TouchableOpacity
-                    style={[
-                        styles.button,
-                        { backgroundColor: taskName.trim() ? '#333' : '#ccc' }
-                    ]}
-                    onPress={handleTaskAdd}
-                    disabled={!taskName.trim()}
-                >
-                    <Text style={styles.buttonText}>
-                        Adicionar
-                    </Text>
-                </TouchableOpacity>
-            </View>
-            <View style={styles.list}>
-                <FlatList
-                    data={tasks}
-                    keyExtractor={item => String(item.id)}
-                    renderItem={({ item }) => <TaskItem task={item} onRemove={handleTaskRemove} />}
-                />
-            </View>
-        </View>
-    );
-}
+      {/* Lista de tarefas */}
+      <FlatList
+        data={tasks}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={({ item }) => (
+          <TaskItem
+            task={item}
+            onRemove={handleTaskRemove}
+            onToggleCompletion={toggleTaskCompletion}
+          />
+        )}
+        ListEmptyComponent={() => (
+          <Text style={styles.emptyListText}>
+            Você ainda não tem tarefas cadastradas.
+          </Text>
+        )}
+      />
+    </View>
+  );
+};
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginHorizontal: 20,
-        marginTop: 40
-    },
-    taskName: {
-        fontSize: 24,
-        fontWeight: 'bold'
-    },
-    form: {
-        flexDirection: 'row',
-        marginTop: 10
-    },
-    input: {
-        flex: 1,
-        height: 40,
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 10
-    },
-    button: {
-        height: 40,
-        marginLeft: 10,
-        paddingHorizontal: 10,
-        borderRadius: 8,
-        backgroundColor: '#333',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    buttonText: {
-        color: '#fff'
-    },
-    list: {
-        marginTop: 20
-    },
-    taskItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        alignItems: 'center',
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-    },
-    removeButton: {
-        padding: 5, 
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-})
+// Componente para cada item da lista de tarefas
+const TaskItem = ({
+  task,
+  onRemove,
+  onToggleCompletion,
+}: {
+  task: Task;
+  onRemove: (id: number) => void;
+  onToggleCompletion: (id: number) => void;
+}) => (
+  <View style={styles.taskItem}>
+    <Checkbox
+      status={task.isCompleted ? "checked" : "unchecked"}
+      onPress={() => onToggleCompletion(task.id)}
+      color="#5E60CE"
+    />
+    <Text style={[styles.taskText, task.isCompleted && styles.completedTask]}>
+      {task.name}
+    </Text>
+    <TouchableOpacity onPress={() => onRemove(task.id)}>
+      <FontAwesome name="trash" size={20} color="#E25858" />
+    </TouchableOpacity>
+  </View>
+);
 
 export default Home;
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#1A1A1A",
+    padding: 20,
+    paddingTop: 50,
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#4EA8DE",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  form: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: "#262626",
+    color: "#F2F2F2",
+    padding: 12,
+    borderRadius: 6,
+    fontSize: 16,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: "#0D0D0D",
+  },
+  addButton: {
+    backgroundColor: "#4EA8DE",
+    borderRadius: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 12,
+  },
+  disabledButton: {
+    backgroundColor: "#1C2733",
+  },
+  taskCounters: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  counterText: {
+    fontSize: 16,
+    color: "#808080",
+  },
+  counterNumber: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#4EA8DE",
+  },
+  taskItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#262626",
+    padding: 12,
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  taskText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#F2F2F2",
+    marginLeft: 8,
+  },
+  completedTask: {
+    textDecorationLine: "line-through",
+    color: "#808080",
+  },
+  emptyListText: {
+    color: "#808080",
+    textAlign: "center",
+    fontSize: 16,
+    marginTop: 20,
+  },
+});
