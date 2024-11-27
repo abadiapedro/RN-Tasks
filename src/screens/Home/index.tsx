@@ -18,14 +18,16 @@ const Home = () => {
                 style={styles.removeButton}
                 onPress={() => onRemove(task.id)}
             >
-                <FontAwesome name="trash-o" size={24} color="red" />
+                <Text style={{ color: 'red' }}>
+                    <Text>
+                        Remover
+                    </Text>
+                </Text>
             </TouchableOpacity>
         </View>
     );
 
-
     function handleTaskAdd() {
-        console.log('Adicionar tarefa');
         const newTask: Task = {
             id: Math.random(),
             name: taskName
