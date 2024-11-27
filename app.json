@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Tasks",
+    "slug": "Tasks",
+    "version": "1.0.0",
+    "android": {
+      "package": "com.anonymous.Tasks"
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.Tasks"
+    }
+  }
+}
