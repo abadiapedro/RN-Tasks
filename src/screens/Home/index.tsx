@@ -49,10 +49,7 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      {/* Título */}
-      <Text style={styles.title}>todo</Text>
-
-      {/* Formulário para adicionar tarefas */}
+      <Text style={styles.title}>ToDo</Text>
       <View style={styles.form}>
         <TextInput
           style={styles.input}
@@ -66,7 +63,7 @@ const Home = () => {
           onPress={handleTaskAdd}
           disabled={!taskName.trim()}
         >
-          <FontAwesome name="plus" size={20} color="#fff" />
+          <Text style={{ color: "#F2F2F2", fontSize: 25, fontWeight: "bold" }}>+</Text>
         </TouchableOpacity>
       </View>
 
@@ -104,7 +101,6 @@ const Home = () => {
   );
 };
 
-// Componente para cada item da lista de tarefas
 const TaskItem = ({
   task,
   onRemove,
